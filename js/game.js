@@ -1895,9 +1895,10 @@ function copySummary() {
   ];
   const txt = lines.join('\n');
   const done = () => { const el = document.getElementById('copied'); if (el) el.textContent = 'Resumo copiado! ✅'; };
-  if (navigator.clipboard) navigator.clipboard.writeText(txt).then(done, () => prompt('Copie o resumo:', txt));
-  else prompt('Copie o resumo:', txt);
+  const fallback = () => { const el = document.getElementById('copied'); if (el) { el.style.whiteSpace = 'pre-wrap'; el.style.userSelect = 'all'; el.textContent = txt; } };
+  try { if (navigator.clipboard) navigator.clipboard.writeText(txt).then(done, fallback); else fallback(); } catch (e) { fallback(); }
 }
 
 // ------------------------------------------------------------
-document.addEventListener('DOMContentLoaded', showHome);
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', showHome);
+else showHome();
