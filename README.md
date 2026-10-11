@@ -1,7 +1,7 @@
 # ⭐⚽ Rumo ao Estrelato
 
 Jogo de navegador que simula uma carreira de jogador de futebol, da base até a aposentadoria.
-Cada escolha muda o rumo da carreira — e **toda escolha mostra a chance de dar certo**.
+Cada escolha muda o rumo da carreira e a sua relação com o técnico, o elenco e a torcida.
 
 Sem login, sem servidor: é só abrir o `index.html` no navegador (ou publicar no GitHub Pages).
 O progresso fica salvo automaticamente no próprio navegador (`localStorage`), com a opção "Continuar carreira".
