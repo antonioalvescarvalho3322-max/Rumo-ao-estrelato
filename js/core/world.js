@@ -141,26 +141,34 @@ const World = (() => {
   }
 
   /**
-   * Nome do torneio de seleções no fim da temporada atual (Copa do Mundo a cada 4 anos
-   * e o torneio continental dois anos depois), ou null.
+   * Torneio de seleções no fim da temporada atual, ou null.
+   * Copa do Mundo a cada 4 anos (2030, 2034...); o torneio continental segue o calendário
+   * da confederação do jogador (CONFEDS.nationsCupYears; ex.: Copa América e Eurocopa em 2028, 2032...).
    * @returns {string|null}
    */
   function tournamentName() {
     if (G.year % 4 === 2) return 'Copa do Mundo';
-    if (G.year % 4 === 0) return CONFEDS[country(G.p.nat).confed].nationsCup;
-    return null;
+    const conf = CONFEDS[country(G.p.nat).confed];
+    const { every, offset } = conf.nationsCupYears;
+    return G.year % every === offset ? conf.nationsCup : null;
   }
 
   /**
    * Sorteia uma seleção adversária dentro de uma faixa de força.
    * @param {number} minS Força mínima.
    * @param {number} maxS Força máxima.
+   * @param {string} [confed] Se informado, só seleções dessa confederação (eliminatórias e torneio continental).
    * @returns {{n: string, s: number}}
    */
-  function natRival(minS, maxS) {
+  function natRival(minS, maxS, confed) {
     const own = country(G.p.nat).name;
-    let pool = NATION_RIVALS.filter(([n, s]) => n !== own && s >= minS && s <= maxS);
-    if (!pool.length) pool = NATION_RIVALS.filter(([n]) => n !== own);
+    const candidates = NATION_RIVALS.filter(([n, , c]) => n !== own && (!confed || c === confed));
+    let pool = candidates.filter(([, s]) => s >= minS && s <= maxS);
+    if (!pool.length) {
+      // Ninguém na faixa: usa as duas seleções de força mais próxima.
+      const distance = s => (s < minS ? minS - s : s > maxS ? s - maxS : 0);
+      pool = [...candidates].sort((a, b) => distance(a[1]) - distance(b[1])).slice(0, 2);
+    }
     const [n, s] = pick(pool);
     return { n, s };
   }

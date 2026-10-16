@@ -280,7 +280,8 @@ const Season = (() => {
       }
     } else if (G.nat.called) {
       const c = World.country(G.p.nat);
-      for (let i = 0; i < 4; i++) Sim.playOffscreen(c.nat, World.natRival(c.nat - 12, c.nat + 2).s, { kind: 'nat' });
+      // Eliminatórias contra seleções do mesmo continente.
+      for (let i = 0; i < 4; i++) Sim.playOffscreen(c.nat, World.natRival(c.nat - 12, c.nat + 2, c.confed).s, { kind: 'nat' });
     }
 
     const games = S.stats.games - startGames;
@@ -369,16 +370,27 @@ const Season = (() => {
   }
 
   /**
+   * Confederação dos adversários no torneio: null na Copa do Mundo (qualquer seleção),
+   * a do jogador no torneio continental (Copa América só com sul-americanos etc.).
+   * @param {string} name Nome do torneio.
+   * @returns {string|null}
+   */
+  function tournamentConfed(name) {
+    return name === 'Copa do Mundo' ? null : World.country(G.p.nat).confed;
+  }
+
+  /**
    * Torneio de seleções: fase de grupos simulada e mata-mata jogado
-   * (Copa do Mundo a partir das oitavas; torneio continental a partir das quartas).
+   * (Copa do Mundo, Eurocopa e Copa da Ásia a partir das oitavas; Copa América e Copa Ouro a partir das quartas).
    */
   function runTournament() {
     const name = World.tournamentName();
     if (!G.nat.called || !name) return next();
     const c = World.country(G.p.nat);
+    const confed = tournamentConfed(name);
     let pts = 0;
     for (let i = 0; i < 3; i++) {
-      const r = Sim.playOffscreen(c.nat, World.natRival(c.nat - 14, c.nat + 2).s, { kind: 'nat' });
+      const r = Sim.playOffscreen(c.nat, World.natRival(c.nat - 14, c.nat + 2, confed).s, { kind: 'nat' });
       pts += r.us > r.them ? 3 : r.us === r.them ? 1 : 0;
     }
     if (pts < 4 || (pts === 4 && rnd() < 0.4)) {
@@ -386,7 +398,8 @@ const Season = (() => {
       return next();
     }
     feedText(`${name} ${G.year}: ${c.name} avançou na fase de grupos com ${pts} pontos.`);
-    const stages = name === 'Copa do Mundo' ? KO_STAGES : KO_STAGES.slice(1);
+    const firstStage = name === 'Copa do Mundo' ? KO_STAGES[0] : CONFEDS[c.confed].nationsCupFrom;
+    const stages = KO_STAGES.slice(KO_STAGES.indexOf(firstStage));
     G.agenda.unshift(...stages.map(stage => ({ t: 'tmatch', stage, name })));
     next();
   }
@@ -399,7 +412,7 @@ const Season = (() => {
     if (item.done) return next();
     const c = World.country(G.p.nat);
     const ranges = { 'Oitavas de final': [72, 84], 'Quartas de final': [78, 87], Semifinal: [80, 89], Final: [83, 89] };
-    const opp = World.natRival(...ranges[item.stage]);
+    const opp = World.natRival(...ranges[item.stage], tournamentConfed(item.name));
     const isFinal = item.stage === 'Final';
     Match.start({
       kind: 'nat', comp: `${item.name} ${G.year}`, stage: item.stage, quick: !isFinal,

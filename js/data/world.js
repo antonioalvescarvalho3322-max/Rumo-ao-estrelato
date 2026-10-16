@@ -12,7 +12,9 @@
  * @typedef {Object} Confederation
  * @property {string} main Torneio continental principal de clubes.
  * @property {string|null} second Torneio continental secundário (ou null se não houver).
- * @property {string} nationsCup Torneio continental de seleções.
+ * @property {string} nationsCup Torneio continental de seleções (só seleções da confederação).
+ * @property {{every: number, offset: number}} nationsCupYears Anos do torneio: ano % every === offset.
+ * @property {string} nationsCupFrom Primeira fase de mata-mata do torneio.
  */
 
 /** @type {Object<string, Confederation>} */
@@ -20,18 +22,26 @@ const CONFEDS = {
   CONMEBOL: {
     main: 'Copa Libertadores', second: 'Copa Sul-Americana',
     nationsCup: 'Copa América',
+    nationsCupYears: { every: 4, offset: 0 }, // 2028, 2032...
+    nationsCupFrom: 'Quartas de final',
   },
   UEFA: {
     main: 'UEFA Champions League', second: 'UEFA Europa League',
     nationsCup: 'Eurocopa',
+    nationsCupYears: { every: 4, offset: 0 }, // 2028, 2032...
+    nationsCupFrom: 'Oitavas de final',
   },
   CONCACAF: {
     main: 'Copa dos Campeões da CONCACAF', second: null,
     nationsCup: 'Copa Ouro',
+    nationsCupYears: { every: 2, offset: 1 }, // anos ímpares: 2027, 2029...
+    nationsCupFrom: 'Quartas de final',
   },
   AFC: {
     main: 'Liga dos Campeões da Ásia', second: null,
     nationsCup: 'Copa da Ásia',
+    nationsCupYears: { every: 4, offset: 3 }, // 2027, 2031...
+    nationsCupFrom: 'Oitavas de final',
   },
 };
 
@@ -314,14 +324,30 @@ const POSITIONS = [
   { id: 'ATA', name: 'Atacante', icon: '⚽' },
 ];
 
-/** Seleções adversárias: [nome, força]. @type {Array<[string, number]>} */
+/**
+ * Seleções adversárias: [nome, força, confederação].
+ * A confederação define quem disputa as eliminatórias e o torneio continental
+ * (Copa América só com sul-americanos, Eurocopa só com europeus etc.).
+ * @type {Array<[string, number, string]>}
+ */
 const NATION_RIVALS = [
-  ['Brasil', 87], ['Argentina', 88], ['França', 89], ['Espanha', 89], ['Inglaterra', 88],
-  ['Portugal', 87], ['Alemanha', 86], ['Holanda', 85], ['Itália', 84], ['Bélgica', 83],
-  ['Croácia', 82], ['Uruguai', 82], ['Colômbia', 82], ['Marrocos', 81], ['Japão', 79],
-  ['Turquia', 79], ['México', 78], ['Estados Unidos', 78], ['Senegal', 78], ['Suíça', 79],
-  ['Dinamarca', 80], ['Equador', 78], ['Coreia do Sul', 76], ['Paraguai', 76], ['Chile', 75],
-  ['Arábia Saudita', 72], ['Austrália', 74], ['Canadá', 75], ['Nigéria', 76], ['Irã', 74],
+  // CONMEBOL
+  ['Brasil', 87, 'CONMEBOL'], ['Argentina', 88, 'CONMEBOL'], ['Uruguai', 82, 'CONMEBOL'], ['Colômbia', 82, 'CONMEBOL'],
+  ['Equador', 78, 'CONMEBOL'], ['Paraguai', 76, 'CONMEBOL'], ['Chile', 75, 'CONMEBOL'], ['Peru', 73, 'CONMEBOL'],
+  ['Venezuela', 72, 'CONMEBOL'], ['Bolívia', 68, 'CONMEBOL'],
+  // UEFA
+  ['França', 89, 'UEFA'], ['Espanha', 89, 'UEFA'], ['Inglaterra', 88, 'UEFA'], ['Portugal', 87, 'UEFA'],
+  ['Alemanha', 86, 'UEFA'], ['Holanda', 85, 'UEFA'], ['Itália', 84, 'UEFA'], ['Bélgica', 83, 'UEFA'],
+  ['Croácia', 82, 'UEFA'], ['Dinamarca', 80, 'UEFA'], ['Turquia', 79, 'UEFA'], ['Suíça', 79, 'UEFA'],
+  ['Áustria', 78, 'UEFA'], ['Sérvia', 77, 'UEFA'], ['Polônia', 76, 'UEFA'], ['Escócia', 74, 'UEFA'],
+  // CONCACAF
+  ['México', 78, 'CONCACAF'], ['Estados Unidos', 78, 'CONCACAF'], ['Canadá', 75, 'CONCACAF'],
+  ['Panamá', 72, 'CONCACAF'], ['Costa Rica', 71, 'CONCACAF'], ['Jamaica', 69, 'CONCACAF'], ['Honduras', 68, 'CONCACAF'],
+  // AFC
+  ['Japão', 79, 'AFC'], ['Coreia do Sul', 76, 'AFC'], ['Irã', 74, 'AFC'], ['Austrália', 74, 'AFC'],
+  ['Arábia Saudita', 72, 'AFC'], ['Catar', 71, 'AFC'], ['Iraque', 70, 'AFC'], ['Uzbequistão', 70, 'AFC'],
+  // CAF (só na Copa do Mundo)
+  ['Marrocos', 81, 'CAF'], ['Senegal', 78, 'CAF'], ['Nigéria', 76, 'CAF'], ['Egito', 75, 'CAF'], ['Costa do Marfim', 75, 'CAF'],
 ];
 
 /** Acesso rápido aos países pelo código. @type {Object<string, Country>} */
