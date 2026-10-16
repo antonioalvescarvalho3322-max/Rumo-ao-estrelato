@@ -1,8 +1,21 @@
-// ============================================================
-// Rumo ao Estrelato — dados do jogo (países, ligas, clubes)
-// s = força do clube (0-100), d = divisão (Brasil: 1=A,2=B,3=C,4=D)
-// ============================================================
+/**
+ * @file Dados do mundo do futebol: confederações, países, ligas, estados brasileiros,
+ * clubes, posições e seleções adversárias.
+ *
+ * Força (s) vai de 0 a 100 e define o nível do clube nas simulações.
+ * Divisão (d) só existe no Brasil: 1 = Série A, 2 = Série B, 3 = Série C, 4 = Série D.
+ * Para adicionar um clube basta incluir uma linha na lista do país ou do estado.
+ */
+'use strict';
 
+/**
+ * @typedef {Object} Confederation
+ * @property {string} main Torneio continental principal de clubes.
+ * @property {string|null} second Torneio continental secundário (ou null se não houver).
+ * @property {string} nationsCup Torneio continental de seleções.
+ */
+
+/** @type {Object<string, Confederation>} */
 const CONFEDS = {
   CONMEBOL: {
     main: 'Copa Libertadores', second: 'Copa Sul-Americana',
@@ -22,6 +35,20 @@ const CONFEDS = {
   },
 };
 
+/**
+ * @typedef {Object} Country
+ * @property {string} id Código do país (ex.: 'BR').
+ * @property {string} name Nome em português.
+ * @property {string} flag Bandeira em emoji.
+ * @property {string} confed Chave em CONFEDS.
+ * @property {number} nat Força da seleção (0-100).
+ * @property {string[]} leagues Nomes das divisões, da 1ª para baixo.
+ * @property {string} cup Copa nacional.
+ * @property {number} top Quantos clubes vão ao torneio continental principal.
+ * @property {Array<[string, number]>} [clubs] Clubes da 1ª divisão: [nome, força]. O Brasil usa BR_STATES.
+ */
+
+/** @type {Country[]} */
 const COUNTRIES = [
   {
     id: 'BR', name: 'Brasil', flag: '🇧🇷', confed: 'CONMEBOL', nat: 87,
@@ -174,7 +201,11 @@ const COUNTRIES = [
   },
 ];
 
-// Estados brasileiros e seus clubes tradicionais: [nome, força, divisão]
+/**
+ * Estados brasileiros e seus clubes tradicionais.
+ * Cada clube: [nome, força, divisão].
+ * @type {Array<{uf: string, name: string, estadual: string, clubs: Array<[string, number, number]>}>}
+ */
 const BR_STATES = [
   {
     uf: 'SP', name: 'São Paulo', estadual: 'Campeonato Paulista', clubs: [
@@ -275,6 +306,7 @@ const BR_STATES = [
   },
 ];
 
+/** Posições jogáveis. @type {Array<{id: string, name: string, icon: string}>} */
 const POSITIONS = [
   { id: 'GOL', name: 'Goleiro', icon: '🧤' },
   { id: 'ZAG', name: 'Zagueiro', icon: '🛡️' },
@@ -282,7 +314,7 @@ const POSITIONS = [
   { id: 'ATA', name: 'Atacante', icon: '⚽' },
 ];
 
-// Times genéricos de seleções adversárias
+/** Seleções adversárias: [nome, força]. @type {Array<[string, number]>} */
 const NATION_RIVALS = [
   ['Brasil', 87], ['Argentina', 88], ['França', 89], ['Espanha', 89], ['Inglaterra', 88],
   ['Portugal', 87], ['Alemanha', 86], ['Holanda', 85], ['Itália', 84], ['Bélgica', 83],
@@ -292,57 +324,5 @@ const NATION_RIVALS = [
   ['Arábia Saudita', 72], ['Austrália', 74], ['Canadá', 75], ['Nigéria', 76], ['Irã', 74],
 ];
 
-// Ídolos históricos: só esses clubes têm o "conselho do ídolo"
-// [nome do ídolo, conselho]
-const IDOLS = {
-  'Flamengo': ['Zico', 'Treina falta até a perna pedir pra parar. Foi assim que eu fiz no Maracanã.'],
-  'Palmeiras': ['Marcos', 'Aqui a cobrança é diária. Quem aguenta a pressão do Allianz vira eterno.'],
-  'Corinthians': ['Marcelinho Carioca', 'A Fiel não perdoa quem corre pouco. Deixa o sangue em campo.'],
-  'São Paulo': ['Rogério Ceni', 'Disciplina é tudo. Seja o primeiro a chegar e o último a sair do CT.'],
-  'Vasco da Gama': ['Juninho Pernambucano', 'Bola parada decide título. Treina até acertar dez seguidas.'],
-  'Fluminense': ['Fred', 'Dentro da área você tem que ser frio. Pensa rápido e bate seco.'],
-  'Botafogo': ['Jairzinho', 'Joga com alegria, garoto. Essa camisa foi feita para quem ousa.'],
-  'Grêmio': ['Renato Gaúcho', 'Confiança, guri! Quem não acredita em si não ganha nada.'],
-  'Internacional': ['Falcão', 'Leia o jogo antes da bola chegar. Inteligência ganha campeonato.'],
-  'Atlético Mineiro': ['Reinaldo', 'A Massa empurra o time. Retribui com entrega em cada lance.'],
-  'Cruzeiro': ['Tostão', 'Futebol é simples: passe certo, movimentação e humildade.'],
-  'Bahia': ['Bobô', 'O torcedor tricolor é apaixonado. Respeita essa história.'],
-  'Boca Juniors': ['Riquelme', 'Na Bombonera a bola tem que ser sua. Pede ela sempre.'],
-  'River Plate': ['Enzo Francescoli', 'Elegância e gol. Jogar bonito também é jogar para ganhar.'],
-  'Barcelona': ['Messi', 'Joga simples e se diverte. O resto vem naturalmente.'],
-  'Real Madrid': ['Raúl', 'Aqui só existe uma opção: ganhar. Todo ano, toda competição.'],
-  'Atlético de Madrid': ['Fernando Torres', 'Luta em cada bola. O Atleti é coração antes de tudo.'],
-  'Manchester United': ['Paul Scholes', 'Passe curto, cabeça erguida e trabalho duro, todos os dias.'],
-  'Liverpool': ['Steven Gerrard', 'Em Anfield você nunca caminha sozinho. Lidera pelo exemplo.'],
-  'Arsenal': ['Thierry Henry', 'Velocidade é arma, mas a calma na finalização é o que separa os grandes.'],
-  'Chelsea': ['Frank Lampard', 'Chega na área de trás. Meia que faz gol vale ouro.'],
-  'Manchester City': ['Sergio Agüero', 'Um gol pode mudar a história de um clube. Esteja pronto para ele.'],
-  'Juventus': ['Alessandro Del Piero', 'Fidelidade e classe. A Juve se lembra de quem fica nos momentos difíceis.'],
-  'Milan': ['Paolo Maldini', 'Concentração por 90 minutos. Um erro e o San Siro não esquece.'],
-  'Inter de Milão': ['Javier Zanetti', 'Profissionalismo é o seu maior talento. Cuide do corpo.'],
-  'Roma': ['Francesco Totti', 'Um clube, uma cidade, uma vida. Pensa nisso antes de qualquer proposta.'],
-  'Napoli': ['Marek Hamšík', 'Nápoles te ama se você amar Nápoles. Simples assim.'],
-  'Bayern de Munique': ['Oliver Kahn', 'Aqui no Bayern o segundo lugar não existe. Nunca desista.'],
-  'Borussia Dortmund': ['Marco Reus', 'A Muralha Amarela te carrega. Dá tudo por ela.'],
-  'Ajax': ['Marco van Basten', 'Técnica primeiro. A escola do Ajax forma craques, não atletas.'],
-  'Benfica': ['Rui Costa', 'O Benfica é uma família gigante. Honre o manto.'],
-  'Porto': ['Vítor Baía', 'O Dragão exige vencer. A mentalidade vencedora se treina.'],
-  'Paris Saint-Germain': ['Raí', 'Paris é exigente, mas reconhece quem joga com o coração.'],
-  'Galatasaray': ['Gheorghe Hagi', 'O inferno do Galatasaray é seu aliado. Sinta a energia.'],
-  'Fenerbahçe': ['Alex de Souza', 'Eu era estrangeiro e virei estátua aqui. Você também pode.'],
-  'Peñarol': ['Fernando Morena', 'Garra charrua, gol e mais gol.'],
-  'Nacional (URU)': ['Álvaro Recoba', 'Uma canhota bem treinada resolve qualquer clássico.'],
-  'Club América': ['Cuauhtémoc Blanco', 'Personalidade! No Azteca o tímido some.'],
-  'Atlético Nacional': ['René Higuita', 'Ousadia, mas com responsabilidade.'],
-  'Al-Hilal': ['Sami Al-Jaber', 'Aqui a cobrança por títulos asiáticos é enorme. Esteja pronto.'],
-  'LA Galaxy': ['Landon Donovan', 'Seja o exemplo dentro e fora de campo.'],
-};
-
-const SHIRT_COLORS = [
-  { id: 'verde', name: 'Verde', main: '#0e6b3c', trim: '#f5d300' },
-  { id: 'preto', name: 'Preto', main: '#121614', trim: '#f5d300' },
-  { id: 'amarelo', name: 'Amarelo', main: '#f5d300', trim: '#0b1f15' },
-  { id: 'branco', name: 'Branco', main: '#eef1ef', trim: '#0e6b3c' },
-  { id: 'vermelho', name: 'Vermelho', main: '#b5121b', trim: '#f4f4f4' },
-  { id: 'azul', name: 'Azul', main: '#1b3fa6', trim: '#f4f4f4' },
-];
+/** Acesso rápido aos países pelo código. @type {Object<string, Country>} */
+const COUNTRY_BY_ID = Object.fromEntries(COUNTRIES.map(c => [c.id, c]));

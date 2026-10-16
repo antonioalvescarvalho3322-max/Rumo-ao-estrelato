@@ -15,8 +15,24 @@
 <body>
   <div id="app"></div>
   <noscript>Ative o JavaScript para jogar.</noscript>
-  <script src="js/data.js"></script>
-  <script src="js/events.js"></script>
-  <script src="js/game.js"></script>
+  <!-- A ordem importa: utilitários, dados, núcleo, motor, interface e, por último, o ponto de entrada. -->
+  <script src="js/core/utils.js"></script>
+  <script src="js/data/world.js"></script>
+  <script src="js/data/idols.js"></script>
+  <script src="js/data/club-colors.js"></script>
+  <script src="js/data/crests.js"></script>
+  <script src="js/data/events.js"></script>
+  <script src="js/data/interviews.js"></script>
+  <script src="js/core/state.js"></script>
+  <script src="js/core/world.js"></script>
+  <script src="js/core/progression.js"></script>
+  <script src="js/engine/simulation.js"></script>
+  <script src="js/engine/interview.js"></script>
+  <script src="js/engine/match.js"></script>
+  <script src="js/engine/season.js"></script>
+  <script src="js/ui/components.js"></script>
+  <script src="js/ui/match-view.js"></script>
+  <script src="js/ui/screens.js"></script>
+  <script src="js/main.js"></script>
 </body>
 </html>
