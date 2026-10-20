@@ -102,6 +102,7 @@
  * @property {AgendaItem|null} cur Passo atual.
  * @property {string|null} pendingTraining Treino de pré-temporada escolhido.
  * @property {boolean} retired Se a carreira terminou.
+ * @property {string|null} [photo] Foto do jogador para a cartinha (imagem JPEG em data URL, reduzida).
  * @property {SeasonState} S Temporada atual.
  */
 

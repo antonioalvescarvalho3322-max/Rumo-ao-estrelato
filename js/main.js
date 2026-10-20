@@ -39,6 +39,8 @@ const ACTIONS = {
 
   // Fim de carreira
   copy: () => Screens.copySummary(),
+  'card-save': () => PlayerCard.save(),
+  'card-remove-photo': () => PlayerCard.removePhoto(),
   'new-career': () => {
     Store.clear();
     Screens.nationPicker();
@@ -80,6 +82,15 @@ function onInput(event) {
 }
 
 /**
+ * Trata a escolha de arquivo (foto do jogador para a cartinha).
+ * @param {Event} event Evento de mudança do campo de arquivo.
+ */
+function onChange(event) {
+  const input = event.target;
+  if (input.dataset && input.dataset.input === 'photo' && input.files && input.files[0]) PlayerCard.setPhoto(input.files[0]);
+}
+
+/**
  * Remove escudos cuja imagem não carregou (arquivo ausente ou sem internet).
  * @param {Event} event Evento de erro (capturado na fase de captura).
  */
@@ -93,6 +104,7 @@ function boot() {
   const app = document.getElementById('app');
   app.addEventListener('click', onClick);
   app.addEventListener('input', onInput);
+  app.addEventListener('change', onChange);
   document.addEventListener('error', onImageError, true);
   watchScreenChanges(app);
   Screens.home();

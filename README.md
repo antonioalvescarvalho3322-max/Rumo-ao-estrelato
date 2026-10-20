@@ -21,10 +21,11 @@ O progresso fica salvo no próprio navegador (`localStorage`), com a opção "Co
 | **Escolhas** | Sem porcentagem: cada opção tem consequência definida, que pode depender do seu momento. |
 | **Entrevistas** | Uma por temporada, sorteada entre 18 perguntas, cada uma com respostas próprias (sem repetir até esgotar). O resultado depende de três fatores juntos: relação com o **elenco**, relação com a **torcida** e os seus **números** na temporada. "Toca em mim que é gol" só funciona se você estiver marcando e com moral. |
 | **Temporada** | Liga e fases iniciais das copas são simuladas e aparecem no resumo. Nos mata-matas você joga a partir das **oitavas**: oitavas, quartas e semifinal têm um lance decisivo; a **final** tem dois lances e pênaltis interativos. Vale para a copa nacional, o torneio continental, o Mundial de Clubes e a Copa do Mundo (o torneio continental de seleções começa nas quartas). |
-| **Overall** | Natural pela idade (até o potencial; cai a partir dos 27). **Treino de pré-temporada**: +2 até 77, +1 de 78 a 87 (a partir de 88 só mantém). **Título**: +1 na temporada em que for campeão. **Artilheiro** ou **líder de assistências do campeonato**: +2. **Artilheiro** ou **líder de assistências do time**: +1. Goleiro menos vazado e melhor zagueiro: +2. |
+| **Overall** | Natural pela idade (até o potencial; cai a partir dos 27). **Treino de pré-temporada**: +2 até 77, +1 de 78 a 87 (a partir de 88 só mantém). **Título**: +1 na temporada em que for campeão. **Artilheiro do campeonato**: +3. **Líder de assistências do campeonato**: +2. **Artilheiro** ou **líder de assistências do time**: +1. Goleiro menos vazado: +2. Melhor zagueiro: +4. |
 | **Seleção** | Overall 85 em grande fase (Fase ≥ 70) garante a convocação. Copa do Mundo em 2030, 2034...; Copa América e Eurocopa em 2028, 2032... (Copa Ouro nos anos ímpares, Copa da Ásia em 2027, 2031...). Eliminatórias e torneios continentais só com seleções do mesmo continente. |
 | **Legado** | Pelo overall máximo da carreira: **Entre os GOATs** (96+), **Craque** (90 a 95), **Bom jogador** (85 a 89), Jogador profissional (abaixo). **Superou o REI** exige 800 gols, 200 assistências, 3 Copas do Mundo, 6+ Bolas de Ouro e 6+ Champions League na mesma carreira. |
-| **Recordes** | Recordista de Bolas de Ouro (9+), Maior campeão da história (44+ títulos), Maior artilheiro da história (950+ gols), Senhor da Champions (7+), Lenda da Libertadores (6+), recordes pela seleção e **O Totti de uma nova era** (500+ jogos por um clube). |
+| **Recordes** | Recordista de Bolas de Ouro (9+), Maior campeão da história (44+ títulos), Maior artilheiro da história (950+ gols), Senhor da Champions (7+), Lenda da Libertadores (6+), recordes pela seleção e **O Francesco Totti da nova geração** (500+ jogos por um clube). |
+| **Cartinha** | No fim da carreira, uma carta no estilo do FIFA com o overall máximo, posição, bandeira, número e seis atributos. O visual muda com o legado (azul com dourado para GOATs e o Rei, ouro para Craque, prata para Bom jogador, bronze). Dá para colocar a sua foto e salvar a imagem (no celular, abre a opção de salvar na galeria). |
 | **Conselho do ídolo** | Só nos clubes com ídolo histórico (Flamengo/Zico, Barcelona/Messi, Bayern/Kahn, Roma/Totti etc.). |
 
 ## Escudos oficiais
@@ -70,6 +71,7 @@ js/engine/match.js       Match: regras dos jogos de mata-mata lance a lance
 js/engine/season.js      Season: agenda da temporada e o que acontece em cada passo
 js/ui/components.js      UI: renderização, cabeçalho, camisa, escudo, resumo e tabela
 js/ui/match-view.js      MatchView: telas da partida
+js/ui/player-card.js     PlayerCard: cartinha de fim de carreira (desenho, foto e salvar imagem)
 js/ui/screens.js         Screens: demais telas (criação, escolhas, fim de temporada, mercado, final)
 js/main.js               liga os cliques (data-act) às ações e abre a tela inicial
 ```
