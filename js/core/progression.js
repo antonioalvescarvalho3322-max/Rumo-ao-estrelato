@@ -28,12 +28,12 @@ const Progression = (() => {
   const BONUS = {
     title: 1,
     titlesPerSeason: 1,
-    leagueTopScorer: 2,
+    leagueTopScorer: 3,
     leagueTopAssists: 2,
     teamTopScorer: 1,
     teamTopAssists: 1,
     bestGoalkeeper: 2,
-    bestDefender: 2,
+    bestDefender: 4,
   };
 
   /**

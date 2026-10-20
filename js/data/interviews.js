@@ -252,7 +252,7 @@ const INTERVIEW_QUESTIONS = [
     question: 'Um lance seu virou meme nas redes sociais. Você viu?',
     answers: [
       { label: 'Vi e ri muito. Quem não ri de si mesmo...', style: 'humor', good: 'Você virou o jogador mais simpático do país.', bad: 'Rir do próprio erro na fase ruim pegou mal.' },
-      { label: 'Meme é coisa de quem não tem argumento.', style: 'provocador', good: 'A resposta virou outro meme, desta vez a seu favor.', bad: 'Você virou meme de novo.' },
+      { label: 'No momento estou focado e isso é coisa de gente atoa.', style: 'provocador', good: 'A resposta virou outro meme, desta vez a seu favor.', bad: 'Você virou meme de novo.' },
       { label: 'Nem vi. Estou focado.', style: 'evasivo', good: 'Foco total, elogiado pelo técnico.', bad: 'Ninguém acreditou que você não viu.' },
     ],
   },
