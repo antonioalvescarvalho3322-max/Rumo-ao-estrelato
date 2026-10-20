@@ -43,6 +43,8 @@
  * @typedef {Object} AgendaItem
  * @property {string} t Tipo do passo.
  * @property {string} [stage] Fase do mata-mata.
+ * @property {number} [round] Rodada da liga (passo 'league').
+ * @property {'derby'|'race'|'last'} [kind] Tipo de rodada importante (passo 'league'; ver Season.leagueStakes).
  * @property {string} [id] Evento escolhido (para não sortear de novo ao retomar).
  * @property {Object} [view] Resultado já calculado (para não aplicar duas vezes ao retomar).
  */
@@ -96,6 +98,7 @@
  * @property {string[]} idolMet Clubes em que o ídolo já deu conselho.
  * @property {string[]} usedQuestions Perguntas de entrevista já feitas (evita repetição).
  * @property {string[]} recentEvents Últimos eventos de carreira (evita repetição).
+ * @property {boolean} [twoGenerations] Chegou aos 45 anos com overall 90+ (título "O terror de duas gerações").
  * @property {Object<string, string|null>} qual Vagas continentais conquistadas na temporada.
  * @property {Array<Object>} feed Resumo exibido no topo da próxima tela.
  * @property {AgendaItem[]} agenda Próximos passos da temporada.

@@ -217,6 +217,22 @@ const World = (() => {
   }
 
   /**
+   * Clássicos do clube contra rivais que estão na mesma liga nesta temporada.
+   * @param {string} name Nome do clube.
+   * @returns {Array<{rival: string, name: string}>}
+   */
+  function classicsOf(name) {
+    const me = club(name);
+    return CLASSICS
+      .filter(([a, b]) => a === name || b === name)
+      .map(([a, b, title]) => ({ rival: a === name ? b : a, name: title }))
+      .filter(({ rival }) => {
+        const other = club(rival);
+        return other && other.c === me.c && other.d === me.d;
+      });
+  }
+
+  /**
    * Faz a força de todos os clubes oscilar um pouco entre as temporadas.
    */
   function driftStrengths() {
@@ -227,6 +243,6 @@ const World = (() => {
 
   return {
     buildClubs, country, club, current, confedOf, leagueName, ofComp, crest, kitColors, salaryFor, marketValue,
-    youthStr, contQualFor, tournamentName, natRival, domesticOpp, contOpp, mundialOpp, driftStrengths,
+    youthStr, contQualFor, tournamentName, natRival, domesticOpp, contOpp, mundialOpp, driftStrengths, classicsOf,
   };
 })();

@@ -226,6 +226,8 @@ const Progression = (() => {
     else if (age <= 28) g = randInt(-1, 0);
     else if (age <= 30) g = randInt(-2, -1);
     else if (age <= 32) g = randInt(-3, -2);
+    // Depois dos 38 só segue jogando quem tem overall 90+ (ver Season.retirementForced), e a idade pesa mais.
+    else if (age >= 38) g = randInt(-5, -3);
     else g = randInt(-4, -3);
     if (g > 0) {
       if (share < 0.3) g -= 1;
@@ -333,6 +335,9 @@ const Progression = (() => {
    */
   const ONE_CLUB_LEGEND = { games: 500, title: 'O Francesco Totti da nova geração' };
 
+  /** Título de quem chega aos 45 anos ainda com overall 90+ (ver Season.retirementForced). */
+  const TWO_GENERATIONS = { title: 'O terror de duas gerações', desc: 'Jogou em alto nível até os 45 anos, enfrentando pais e filhos.' };
+
   /**
    * Recordes históricos batidos na carreira.
    * @returns {Array<{title: string, desc: string}>}
@@ -351,6 +356,7 @@ const Progression = (() => {
     if (lib >= 6) out.push({ title: 'Lenda da Libertadores', desc: `${lib} Libertadores, ${lib > 6 ? 'superando' : 'igualando'} Francisco Sá.` });
     if (G.nat.caps >= 225) out.push({ title: 'Recordista pela seleção', desc: `${G.nat.caps} jogos por seleções.` });
     if (G.nat.goals >= 145) out.push({ title: 'Maior artilheiro de seleções', desc: `${G.nat.goals} gols pela seleção, passando Cristiano Ronaldo.` });
+    if (G.twoGenerations) out.push({ title: TWO_GENERATIONS.title, desc: TWO_GENERATIONS.desc });
     for (const [clubName, games] of Object.entries(gamesByClub())) {
       if (games >= ONE_CLUB_LEGEND.games) {
         const idol = IDOLS[clubName];
