@@ -313,7 +313,7 @@ const Progression = (() => {
     if (peak >= 96) return { id: 'goat', title: 'Entre os GOATs', desc: `Chegou a ${peak} de overall. Poucos na história jogaram tanto.` };
     if (peak >= 90) return { id: 'craque', title: 'Craque', desc: `Overall máximo de ${peak}: um dos melhores da sua geração.` };
     if (peak >= 85) return { id: 'bom', title: 'Bom jogador', desc: `Overall máximo de ${peak}: carreira respeitada.` };
-    return { id: 'pro', title: 'Jogador profissional', desc: `Overall máximo de ${peak}. Viveu do futebol, o sonho de muita gente.` };
+    return { id: 'pro', title: 'comum da bola ', desc: `Overall máximo de ${peak}. Foi bem mas esperavam mais coisas vindo de você.` };
   }
 
   /**
@@ -338,7 +338,7 @@ const Progression = (() => {
     const ucl = countTitles(/^UEFA Champions League$/);
     const lib = countTitles(/^Copa Libertadores$/);
     if (bdo >= 9) out.push({ title: 'Recordista de Bolas de Ouro', desc: `${bdo} Bolas de Ouro, superando as 8 de Messi.` });
-    if (total >= 44) out.push({ title: 'Maior campeão da história', desc: `${total} títulos, passando os 43 de Daniel Alves.` });
+    if (total >= 50) out.push({ title: 'Maior campeão da história', desc: `${total} títulos, passando os 49 de Lionel Messi.` });
     if (goals >= 950) out.push({ title: 'Maior artilheiro da história', desc: `${goals} gols oficiais, passando Cristiano Ronaldo.` });
     if (ucl >= 7) out.push({ title: 'Senhor da Champions', desc: `${ucl} Champions League, superando as 6 de Gento e Modrić.` });
     if (lib >= 6) out.push({ title: 'Lenda da Libertadores', desc: `${lib} Libertadores, ${lib > 6 ? 'superando' : 'igualando'} Francisco Sá.` });

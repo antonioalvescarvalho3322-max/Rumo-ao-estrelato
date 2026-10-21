@@ -10,7 +10,7 @@
 const IDOLS = {
   'Flamengo': ['Zico', 'Treina falta até a perna pedir pra parar. Foi assim que eu fiz no Maracanã.'],
   'Palmeiras': ['Marcos', 'Aqui a cobrança é diária. Quem aguenta a pressão do Allianz vira eterno.'],
-  'Corinthians': ['Craque Neto', 'A Fiel não perdoa quem corre pouco. Deixa o sangue em campo.'],
+  'Corinthians': ['Craque Neto', 'Eu JOGO MAIS SEU POR**. Deixa o sangue em campo.'],
   'São Paulo': ['Rogério Ceni', 'Disciplina é tudo. Seja o primeiro a chegar e o último a sair do CT.'],
   'Vasco da Gama': ['Juninho Pernambucano', 'Bola parada decide título. Treina até acertar dez seguidas.'],
   'Fluminense': ['Fred', 'Dentro da área você tem que ser frio. Pensa rápido e bate seco.'],

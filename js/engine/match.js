@@ -52,7 +52,7 @@ const Match = (() => {
       opts: [
         ['Chutar forte no canto', 0.30, 0.35, 'goal'],
         ['Tentar a cavadinha', 0.15, 0.35, 'goal', 'golaço'],
-        ['Driblar o goleiro', 0.22, 0.33, 'goal'],
+        ['Driblar o goleiro', 0.22, 0.33, 'goal', 'puskas'],
         ['Rolar para o companheiro livre', 0.35, 0.30, 'assist'],
       ],
     },
@@ -60,7 +60,7 @@ const Match = (() => {
       text: 'Cruzamento na área! A bola vem <b>na sua cabeça</b>.',
       opts: [
         ['Cabecear firme para o chão', 0.18, 0.30, 'goal'],
-        ['Desviar de leve no primeiro pau', 0.14, 0.28, 'goal'],
+        ['Virar uma bicicleta insana', 0.09, 0.18, 'goal'],
         ['Escorar para trás', 0.22, 0.25, 'assist'],
       ],
     },
@@ -170,6 +170,7 @@ const Match = (() => {
   const WIN_TEXT = {
     goal: 'GOL! Você balançou a rede!',
     golaço: 'GOLAÇO! Que pintura!',
+    puskas: 'QUE PUSKAS! DEU UMA BICICLETA INSANA e marcou um golaço.',
     assist: 'Assistência perfeita! Seu companheiro empurrou para a rede.',
     block: 'Desarme perfeito! Você salvou o time.',
     save: 'Defesaça! Você fechou o gol.',
