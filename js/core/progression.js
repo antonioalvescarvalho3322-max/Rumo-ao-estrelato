@@ -313,7 +313,7 @@ const Progression = (() => {
     if (peak >= 96) return { id: 'goat', title: 'Entre os GOATs', desc: `Chegou a ${peak} de overall. Poucos na história jogaram tanto.` };
     if (peak >= 90) return { id: 'craque', title: 'Craque', desc: `Overall máximo de ${peak}: um dos melhores da sua geração.` };
     if (peak >= 85) return { id: 'bom', title: 'Bom jogador', desc: `Overall máximo de ${peak}: carreira respeitada.` };
-    return { id: 'pro', title: 'comum da bola ', desc: `Overall máximo de ${peak}. Foi bem mas esperavam mais coisas vindo de você.` };
+    return { id: 'pro', title: 'Comum da bola', desc: `Overall máximo de ${peak}. Foi bem mas esperavam mais coisas vindo de você.` };
   }
 
   /**
