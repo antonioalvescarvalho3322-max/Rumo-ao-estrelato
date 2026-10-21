@@ -43,8 +43,11 @@
  * @typedef {Object} AgendaItem
  * @property {string} t Tipo do passo.
  * @property {string} [stage] Fase do mata-mata.
+ * @property {number} [round] Rodada da liga (passo 'league').
+ * @property {'derby'|'race'|'last'} [kind] Tipo de rodada importante (passo 'league'; ver Season.leagueStakes).
  * @property {string} [id] Evento escolhido (para não sortear de novo ao retomar).
  * @property {Object} [view] Resultado já calculado (para não aplicar duas vezes ao retomar).
+ * @property {Object} [opp] Adversário sorteado para o jogo deste passo.
  */
 
 /**
@@ -70,6 +73,7 @@
  * @property {number} ovrStart Overall no início da temporada.
  * @property {number} benchRate Fração de jogos fora do time no último bloco.
  * @property {string[]} used Eventos já usados na temporada.
+ * @property {Object<string, string[]>} [faced] Adversários já enfrentados por competição (sem repetir no mata-mata).
  * @property {number} moreOffers Bônus de propostas para a próxima janela.
  * @property {Object} [league] Tabela da liga.
  * @property {{name: string, alive: boolean}} [cup] Copa nacional.
@@ -96,12 +100,14 @@
  * @property {string[]} idolMet Clubes em que o ídolo já deu conselho.
  * @property {string[]} usedQuestions Perguntas de entrevista já feitas (evita repetição).
  * @property {string[]} recentEvents Últimos eventos de carreira (evita repetição).
+ * @property {boolean} [twoGenerations] Chegou aos 45 anos com overall 90+ (título "O terror de duas gerações").
  * @property {Object<string, string|null>} qual Vagas continentais conquistadas na temporada.
  * @property {Array<Object>} feed Resumo exibido no topo da próxima tela.
  * @property {AgendaItem[]} agenda Próximos passos da temporada.
  * @property {AgendaItem|null} cur Passo atual.
  * @property {string|null} pendingTraining Treino de pré-temporada escolhido.
  * @property {boolean} retired Se a carreira terminou.
+ * @property {string|null} [photo] Foto do jogador para a cartinha (imagem JPEG em data URL, reduzida).
  * @property {SeasonState} S Temporada atual.
  */
 

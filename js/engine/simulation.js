@@ -212,15 +212,24 @@ const Sim = (() => {
   }
 
   /**
-   * Simula uma rodada da liga inteira (inclusive o jogo do clube do jogador).
+   * Simula uma rodada da liga inteira.
+   * Sem argumento, o jogo do clube do jogador também é simulado. Com `played`, usa o
+   * resultado do jogo disputado lance a lance (e o adversário recebe o placar invertido).
+   * @param {{opp: string, us: number, them: number}} [played] Jogo já disputado nesta rodada.
    */
-  function leagueRound() {
+  function leagueRound(played) {
     const L = G.S.league;
     for (const row of L.table) {
       const opp = pick(L.table.filter(r => r.n !== row.n));
       let gf;
       let ga;
-      if (row.n === G.club) {
+      if (played && row.n === G.club) {
+        gf = played.us;
+        ga = played.them;
+      } else if (played && row.n === played.opp) {
+        gf = played.them;
+        ga = played.us;
+      } else if (row.n === G.club) {
         const r = playOffscreen(World.current().s, opp.s, { league: true });
         gf = r.us;
         ga = r.them;

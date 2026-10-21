@@ -156,5 +156,22 @@ const Util = (() => {
     return luminance > 0.6 ? '#111111' : '#ffffff';
   }
 
-  return { rnd, clamp, randInt, randRange, pick, shuffle, weighted, poisson, esc, fmtMoney, plural, signed, slug, contrastText };
+  /**
+   * Cria um gerador de números aleatórios com semente: o mesmo texto gera sempre a mesma sequência.
+   * Usado para que a cartinha do jogador saia igual toda vez que for desenhada.
+   * @param {string} seedText Texto de origem (ex.: nome do jogador).
+   * @returns {() => number} Função que devolve números em [0, 1).
+   */
+  function seeded(seedText) {
+    let h = 2166136261;
+    for (const ch of String(seedText)) h = Math.imul(h ^ ch.codePointAt(0), 16777619);
+    return () => {
+      h = Math.imul(h ^ (h >>> 15), 2246822507);
+      h = Math.imul(h ^ (h >>> 13), 3266489909);
+      h ^= h >>> 16;
+      return (h >>> 0) / 4294967296;
+    };
+  }
+
+  return { seeded, rnd, clamp, randInt, randRange, pick, shuffle, weighted, poisson, esc, fmtMoney, plural, signed, slug, contrastText };
 })();

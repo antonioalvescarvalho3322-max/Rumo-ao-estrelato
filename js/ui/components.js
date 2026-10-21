@@ -156,8 +156,9 @@ const UI = (() => {
    * @returns {string} HTML.
    */
   function matchCard(c) {
-    return `<div class="feed-match ${c.win ? 'w' : 'l'}">
-      <div class="fm-head"><span>${esc(c.comp)} · ${esc(c.stage)}</span><b>${c.win ? 'Classificado' : 'Eliminado'}</b></div>
+    const outcome = c.league ? (c.win ? 'Vitória' : c.draw ? 'Empate' : 'Derrota') : (c.win ? 'Classificado' : 'Eliminado');
+    return `<div class="feed-match ${c.win ? 'w' : c.draw ? 'd' : 'l'}">
+      <div class="fm-head"><span>${esc(c.comp)} · ${esc(c.stage)}</span><b>${outcome}</b></div>
       <div class="fm-score">
         <span class="fm-team">${c.ourClub ? crest(c.ourClub, 'crest-xs') : ''}${esc(c.ourName)}</span>
         <b>${c.us} : ${c.them}</b>

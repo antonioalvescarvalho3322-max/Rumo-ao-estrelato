@@ -6,8 +6,9 @@
  *   - Crescimento natural pela idade (só até o potencial; a partir dos 27 vira queda).
  *   - Treino de pré-temporada escolhido pelo jogador (passa do potencial): +2 até 77,
  *     +1 de 78 a 87; a partir de 88 o treino só mantém o nível.
- *   - Conquistas: +1 na temporada em que ganhar título, +2 artilheiro ou líder de
- *     assistências do campeonato, +1 artilheiro ou líder de assistências do time.
+ *   - Conquistas: +1 na temporada em que ganhar título, +3 artilheiro e +2 líder de
+ *     assistências do campeonato, +1 artilheiro ou líder de assistências do time
+ *     (valores em BONUS).
  *   - Algumas escolhas fora de campo (treino extra, conselho do ídolo).
  */
 'use strict';
@@ -225,6 +226,8 @@ const Progression = (() => {
     else if (age <= 28) g = randInt(-1, 0);
     else if (age <= 30) g = randInt(-2, -1);
     else if (age <= 32) g = randInt(-3, -2);
+    // Depois dos 38 só segue jogando quem tem overall 90+ (ver Season.retirementForced), e a idade pesa mais.
+    else if (age >= 38) g = randInt(-5, -3);
     else g = randInt(-4, -3);
     if (g > 0) {
       if (share < 0.3) g -= 1;
@@ -327,6 +330,15 @@ const Progression = (() => {
   }
 
   /**
+   * Título de quem defende o mesmo clube por muitos jogos (aparece em "Recordes" na tela final).
+   * Para mudar o nome ou o número de jogos, altere aqui.
+   */
+  const ONE_CLUB_LEGEND = { games: 500, title: 'O Francesco Totti da nova geração' };
+
+  /** Título de quem chega aos 45 anos ainda com overall 90+ (ver Season.retirementForced). */
+  const TWO_GENERATIONS = { title: 'O terror de duas gerações', desc: 'Jogou em alto nível até os 45 anos, enfrentando pais e filhos.' };
+
+  /**
    * Recordes históricos batidos na carreira.
    * @returns {Array<{title: string, desc: string}>}
    */
@@ -344,17 +356,48 @@ const Progression = (() => {
     if (lib >= 6) out.push({ title: 'Lenda da Libertadores', desc: `${lib} Libertadores, ${lib > 6 ? 'superando' : 'igualando'} Francisco Sá.` });
     if (G.nat.caps >= 225) out.push({ title: 'Recordista pela seleção', desc: `${G.nat.caps} jogos por seleções.` });
     if (G.nat.goals >= 145) out.push({ title: 'Maior artilheiro de seleções', desc: `${G.nat.goals} gols pela seleção, passando Cristiano Ronaldo.` });
+    if (G.twoGenerations) out.push({ title: TWO_GENERATIONS.title, desc: TWO_GENERATIONS.desc });
     for (const [clubName, games] of Object.entries(gamesByClub())) {
-      if (games >= 500) {
+      if (games >= ONE_CLUB_LEGEND.games) {
         const idol = IDOLS[clubName];
-        out.push({ title: 'O Totti de uma nova era', desc: `${games} jogos pelo ${clubName}${idol ? `. Seu nome agora está ao lado de ${idol[0]} na história do clube` : ''}.` });
+        out.push({ title: ONE_CLUB_LEGEND.title, desc: `${games} jogos pelo ${clubName}${idol ? `. Seu nome agora está ao lado de ${idol[0]} na história do clube` : ''}.` });
       }
     }
     return out;
   }
 
+  /** Ajuste de cada atributo da cartinha em relação ao overall, por posição. */
+  const CARD_PROFILES = {
+    ATA: { labels: ['RIT', 'FIN', 'PAS', 'DRI', 'DEF', 'FÍS'], offsets: [3, 4, -7, 1, -45, -5] },
+    MEI: { labels: ['RIT', 'FIN', 'PAS', 'DRI', 'DEF', 'FÍS'], offsets: [-2, -3, 4, 3, -20, -6] },
+    ZAG: { labels: ['RIT', 'FIN', 'PAS', 'DRI', 'DEF', 'FÍS'], offsets: [-10, -40, -15, -18, 4, 3] },
+    GOL: { labels: ['ELA', 'MAN', 'CHU', 'REF', 'VEL', 'POS'], offsets: [2, 0, -10, 3, -35, 1] },
+  };
+
+  /**
+   * Atributos da cartinha de fim de carreira, no estilo das cartas do FIFA.
+   * Partem do overall máximo e da posição; finalização e passe sobem com gols e
+   * assistências por jogo. Uma variação fixa por nome deixa cada carta única.
+   * @returns {{ovr: number, labels: string[], values: number[]}}
+   */
+  function cardStats() {
+    const p = G.p;
+    const profile = CARD_PROFILES[p.pos];
+    const random = Util.seeded(p.name + p.pos);
+    const games = Math.max(1, G.career.games + G.nat.caps);
+    const goalsPerGame = (G.career.goals + G.nat.goals) / games;
+    const assistsPerGame = (G.career.assists + G.nat.assists) / games;
+    const values = profile.offsets.map((offset, i) => {
+      let v = p.peak + offset + Math.round(random() * 6 - 3);
+      if (p.pos !== 'GOL' && i === 1) v += clamp(Math.round((goalsPerGame - 0.45) * 10), -3, 4);
+      if (p.pos !== 'GOL' && i === 2) v += clamp(Math.round((assistsPerGame - 0.2) * 12), -3, 4);
+      return clamp(v, 25, 99);
+    });
+    return { ovr: p.peak, labels: profile.labels, values };
+  }
+
   return {
-    BONUS, TRAININGS, addOverall, titleBonus, applyEffects, applyTraining, naturalGrowth, leagueAchievements,
+    cardStats, BONUS, TRAININGS, addOverall, titleBonus, applyEffects, applyTraining, naturalGrowth, leagueAchievements,
     countTitles, balloons, kingChecklist, legacyTier, gamesByClub, records,
   };
 })();

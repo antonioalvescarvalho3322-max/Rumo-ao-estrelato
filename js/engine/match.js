@@ -23,7 +23,10 @@
  * @property {string} [ourClub] Clube do jogador (para o escudo).
  * @property {{n: string, s: number, flag?: string, club?: string}} opp Adversário.
  * @property {boolean|null} home Mando de campo (null = neutro).
- * @property {(res: {us: number, them: number, win: boolean}) => string} onEnd Chamado no fim; devolve uma mensagem.
+ * @property {boolean} [knockout] false em jogo de liga (pode empatar; sem pênaltis). Padrão: true.
+ * @property {boolean} [league] true se vale pela liga (soma na artilharia/assistências da liga).
+ * @property {string} [label] Texto da faixa do lance (ex.: "Clássico dos Milhões").
+ * @property {(res: {us: number, them: number, win: boolean, draw: boolean}) => string} onEnd Chamado no fim; devolve uma mensagem.
  */
 
 /** Namespace das partidas interativas. */
@@ -607,14 +610,14 @@ const Match = (() => {
   // ---------------- Fim de jogo ----------------
 
   /**
-   * Fecha o tempo normal. Empate leva aos pênaltis (todo jogo aqui é mata-mata).
+   * Fecha o tempo normal. No mata-mata, empate leva aos pênaltis; na liga, fica o empate.
    * @param {boolean} auto Se a partida está sendo simulada.
    */
   function finish(auto) {
     const [a, b] = scoreAt(999);
     M.us = a;
     M.them = b;
-    if (a !== b) return conclude();
+    if (a !== b || M.knockout === false) return conclude();
     if (auto || M.quick || !M.playing || M.red) {
       M.auto = true;
       return startShootout();
@@ -630,18 +633,19 @@ const Match = (() => {
     const p = G.p;
     const { us, them } = M;
     const win = us > them || (us === them && M.penWin === true);
+    const draw = M.knockout === false && us === them;
     const before = { ovr: p.ovr, form: p.form, coach: p.coach, chem: p.chem, fans: p.fans };
     let rating = null;
 
     if (M.playing) {
-      let r = (M.titular ? 6.3 : 6.0) + M.rDelta + (win ? 0.3 : -0.3) + rnd() * 0.4 - 0.2;
+      let r = (M.titular ? 6.3 : 6.0) + M.rDelta + (win ? 0.3 : draw ? 0 : -0.3) + rnd() * 0.4 - 0.2;
       if (p.pos === 'GOL') r += them === 0 ? 0.6 : -them * 0.15;
       if (p.pos === 'ZAG') r += them === 0 ? 0.3 : -them * 0.1;
       rating = Math.round(clamp(r, 3, 10) * 10) / 10;
       p.form = clamp(p.form + (rating - 6.6) * 6, 0, 100);
       p.coach = clamp(p.coach + (rating - 6.6) * 3, 0, 100);
       p.chem = clamp(p.chem + 2, 0, 100);
-      p.fans = clamp(p.fans + (rating - 6.6) * 4 + (win ? 4 : -2), 0, 100);
+      p.fans = clamp(p.fans + (rating - 6.6) * 4 + (win ? 4 : draw ? 0 : -2), 0, 100);
       p.fame = clamp(p.fame + M.goals * 0.5 + (rating >= 8 ? 1 : 0) + (win ? 2 : 0), 0, 100);
       if (M.red) p.suspended += 1;
     } else if (M.unavailable) {
@@ -651,7 +655,7 @@ const Match = (() => {
     }
     recordStats(rating);
 
-    const message = M.onEnd({ us, them, win }) || '';
+    const message = M.onEnd({ us, them, win, draw }) || '';
     G.cur.done = true;
     Season.checkCallup();
 
@@ -662,7 +666,7 @@ const Match = (() => {
       const v = Math.round(p[key] - before[key]);
       if (v) chips.push({ text: `${label} ${Util.signed(v)}`, tone: v > 0 ? 'up' : 'down' });
     }
-    const summary = { win, rating, message, chips };
+    const summary = { win, draw, rating, message, chips };
     if (M.quick) {
       G.feed.push(MatchView.card(M, summary));
       M = null;
@@ -691,6 +695,10 @@ const Match = (() => {
     if (M.titular) st.starts++;
     st.goals += M.goals;
     st.assists += M.assists;
+    if (M.league) {
+      st.leagueGoals += M.goals;
+      st.leagueAssists += M.assists;
+    }
     st.rSum += rating;
     st.rN++;
     if (G.p.pos === 'GOL' && M.titular && M.them === 0) st.cleanSheets++;

@@ -301,9 +301,20 @@ const Screens = (() => {
         </div>
         ${view.callHint ? '<p class="hint">Convocação: overall 85 e grande fase (Fase 70 ou mais).</p>' : ''}
         ${view.forcedRetirement
-          ? '<p class="big-msg">Seu corpo já não aguenta o ritmo. Hora de pendurar as chuteiras.</p><button class="btn big" data-act="retire">Encerrar carreira</button>'
-          : `${trainingPicker()}${view.canRetire ? '<button class="btn ghost" data-act="retire">Aposentar-se agora</button>' : ''}`}
+          ? `<p class="big-msg">${retireMessage(view)}</p><button class="btn big" data-act="retire">Encerrar carreira</button>`
+          : `${view.extended ? '<p class="hint">Overall 90 ou mais: a carreira segue até os 45 anos enquanto ele se mantiver.</p>' : ''}${trainingPicker()}${view.canRetire ? '<button class="btn ghost" data-act="retire">Aposentar-se agora</button>' : ''}`}
       </section>`);
+  }
+
+  /**
+   * Texto da aposentadoria obrigatória.
+   * @param {{age: number, ovrEnd: number}} view Dados do fim de temporada.
+   * @returns {string}
+   */
+  function retireMessage(view) {
+    if (G.twoGenerations) return '45 anos e ainda entre os melhores do mundo. Você é <b>O terror de duas gerações</b>!';
+    if (view.age > 38 && view.ovrEnd < 90) return 'O overall caiu abaixo de 90. Depois de anos desafiando o tempo, é hora de pendurar as chuteiras.';
+    return 'Seu corpo já não aguenta o ritmo. Hora de pendurar as chuteiras.';
   }
 
   /**
@@ -368,7 +379,7 @@ const Screens = (() => {
     return [...map.values()].sort((a, b) => order[a.kind] - order[b.kind] || b.years.length - a.years.length);
   }
 
-  /** Tela final: título de legado, recordes, títulos, prêmios, números e trajetória. */
+  /** Tela final: título de legado, cartinha, recordes, títulos, prêmios, números e trajetória. */
   function final() {
     const p = G.p;
     const car = G.career;
@@ -397,6 +408,8 @@ const Screens = (() => {
             <p class="muted">${POSITIONS.find(x => x.id === p.pos).name} · aposentou-se aos ${p.age} anos · overall máximo ${p.peak}</p>
           </div>
         </div>
+
+        ${PlayerCard.sectionHtml()}
 
         ${records.length ? `<h2>Recordes</h2><div class="honors">${records.map(r => `<div class="honor"><b>${r.title}</b><span>${r.desc}</span></div>`).join('')}</div>` : ''}
 
@@ -441,6 +454,7 @@ const Screens = (() => {
         </div>
         <p id="copied" class="hint center"></p>
       </section>`, { hud: false, mood: 'final' });
+    PlayerCard.mount();
   }
 
   /** Copia um resumo da carreira em texto (ou mostra o texto na tela, se não for possível copiar). */

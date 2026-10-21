@@ -190,6 +190,8 @@ b { font-weight: 700; }
 .news .chips { margin: 4px 0 8px; }
 .feed-match { background: var(--ink); border: 1px solid var(--line); border-left: 3px solid var(--good); padding: 10px 12px; margin: 8px 0; }
 .feed-match.l { border-left-color: var(--bad); }
+.feed-match.d { border-left-color: var(--yellow); }
+.feed-match.d .fm-head b { color: var(--yellow); }
 .fm-head { display: flex; justify-content: space-between; gap: 8px; font-family: var(--display); text-transform: uppercase; letter-spacing: .08em; font-size: .8rem; }
 .fm-head span { color: var(--muted); }
 .feed-match.w .fm-head b { color: var(--good); }
@@ -270,6 +272,7 @@ b { font-weight: 700; }
 .result { font-size: 3rem; text-align: center; margin-top: 10px; }
 .result.w { color: var(--good); }
 .result.l { color: var(--bad); }
+.result.d { color: var(--yellow); }
 .big-msg { font-family: var(--display); font-weight: 800; text-transform: uppercase; font-size: 1.4rem; color: var(--yellow); text-align: center; letter-spacing: .03em; }
 .rating { display: flex; gap: 14px; align-items: center; justify-content: center; margin: 14px 0; }
 .rating .r { font-family: var(--display); font-weight: 800; font-size: 2.2rem; width: 76px; height: 76px; display: flex; align-items: center; justify-content: center; border: 3px solid currentColor; }
@@ -341,6 +344,11 @@ b { font-weight: 700; }
 .ometa b { color: var(--text); }
 
 /* ---------- Final ---------- */
+.fut { display: grid; grid-template-columns: minmax(0, 300px) 1fr; gap: 20px; align-items: center; }
+.fut-card { width: 100%; max-width: 300px; height: auto; display: block; filter: drop-shadow(0 12px 28px rgba(0,0,0,.6)); }
+.fut-actions { display: grid; gap: 4px; align-content: start; min-width: 0; }
+.fut-actions .btn { width: 100%; }
+.fut-photo { position: relative; }
 .final h2 { margin-top: 28px; display: flex; align-items: center; gap: 10px; }
 .final h2::after { content: ''; flex: 1; height: 2px; background: var(--line); }
 .final h2 .count { background: var(--yellow); color: #111; padding: 0 8px; font-size: 1.3rem; }
@@ -381,6 +389,8 @@ summary { cursor: pointer; color: var(--muted); font-family: var(--display); tex
   .form-grid { grid-template-columns: 1fr; }
   .shirt-preview { max-width: 140px; margin: 0 auto; }
   .final-hero { grid-template-columns: 1fr; text-align: center; }
+  .fut { grid-template-columns: 1fr; justify-items: center; }
+  .fut-actions { width: 100%; }
   .final-hero .jersey.big { max-width: 120px; }
   .scoreboard .score b { font-size: 2.2rem; min-width: 40px; }
   .scoreboard .team { font-size: .9rem; }

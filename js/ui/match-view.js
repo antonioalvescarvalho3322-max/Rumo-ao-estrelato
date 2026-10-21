@@ -94,7 +94,7 @@ const MatchView = (() => {
     const status = M.titular ? 'Titular' : 'Entrou no 2º tempo';
     const diff = M.opp.s - M.ourStr;
     const favorite = diff > 4 ? 'adversário favorito' : diff < -4 ? 'seu time é favorito' : 'jogo equilibrado';
-    const label = M.quick ? 'Lance decisivo' : `Final · ${favorite}`;
+    const label = M.label || (M.quick ? 'Lance decisivo' : `Final · ${favorite}`);
     return `<div class="quick-banner"><span>${label}</span><b>${status}</b><button class="link" data-act="match-sim">Simular</button></div>`;
   }
 
@@ -209,14 +209,14 @@ const MatchView = (() => {
    * @param {{win: boolean, rating: number|null, message: string, chips: Chip[]}} summary Resumo.
    */
   function result(M, summary) {
-    const { win, rating, message, chips } = summary;
+    const { win, draw, rating, message, chips } = summary;
     UI.render(`
       <section class="panel match">
         ${head(M)}
         ${scoreboard(M, 999)}
         ${M.penScore ? `<p class="center">Pênaltis <b>${M.penScore}</b></p>` : ''}
         ${flash(M)}
-        <h2 class="result ${win ? 'w' : 'l'}">${win ? 'Vitória' : 'Derrota'}</h2>
+        <h2 class="result ${win ? 'w' : draw ? 'd' : 'l'}">${win ? 'Vitória' : draw ? 'Empate' : 'Derrota'}</h2>
         ${message ? `<p class="big-msg">${message}</p>` : ''}
         ${rating !== null
           ? `<div class="rating"><div class="r ${rating >= 7.5 ? 'hi' : rating >= 6.5 ? 'mid' : 'lo'}">${rating.toFixed(1)}</div><div>Sua nota<br><small>${Util.plural(M.goals, 'gol', 'gols')} · ${Util.plural(M.assists, 'assistência', 'assistências')}${M.red ? ' · expulso' : ''}</small></div></div>`
@@ -230,7 +230,7 @@ const MatchView = (() => {
   /**
    * Cartão-resumo de um jogo rápido, exibido no topo da próxima tela.
    * @param {Object} M Partida.
-   * @param {{win: boolean, rating: number|null, message: string, chips: Chip[]}} summary Resumo.
+   * @param {{win: boolean, draw: boolean, rating: number|null, message: string, chips: Chip[]}} summary Resumo.
    * @returns {Object} Item do resumo (feed).
    */
   function card(M, summary) {
@@ -247,6 +247,8 @@ const MatchView = (() => {
       them: M.them,
       pens: M.penScore || null,
       win: summary.win,
+      draw: summary.draw,
+      league: M.knockout === false,
       rating: summary.rating,
       narrative,
       message: summary.message,

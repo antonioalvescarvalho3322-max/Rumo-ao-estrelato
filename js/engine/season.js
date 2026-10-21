@@ -88,6 +88,35 @@ const Season = (() => {
   }
 
   /**
+   * Lista dos adversários já enfrentados numa competição nesta temporada, para que ninguém
+   * apareça duas vezes no mesmo mata-mata (ou no mesmo turno da liga).
+   * @param {string} key Competição (ex.: 'cup', 'cont', 'tourn', 'league2').
+   * @returns {string[]} Lista (pode ser alterada: quem a recebe acrescenta o novo adversário).
+   */
+  function faced(key) {
+    G.S.faced = G.S.faced || {};
+    G.S.faced[key] = G.S.faced[key] || [];
+    return G.S.faced[key];
+  }
+
+  /**
+   * Adversário de um passo da agenda: sorteado uma vez e guardado no próprio passo
+   * (ao retomar uma carreira salva, o jogo continua contra o mesmo time).
+   * @param {AgendaItem} item Passo atual.
+   * @param {string} key Competição (ver faced).
+   * @param {(exclude: string[]) => {n: string}} draw Sorteio que recebe os já enfrentados.
+   * @returns {Object} Adversário.
+   */
+  function opponentFor(item, key, draw) {
+    if (!item.opp) {
+      const list = faced(key);
+      item.opp = draw(list);
+      list.push(item.opp.n);
+    }
+    return item.opp;
+  }
+
+  /**
    * Monta a temporada de base (16 anos): dois eventos, a campanha na copa sub-17 e a promoção.
    */
   function startBase() {
@@ -132,13 +161,17 @@ const Season = (() => {
     const hasCont = Boolean(G.S.cont);
     const A = [];
     if (club.c === 'BR') A.push({ t: 'estadual' });
-    A.push({ t: 'block', n: 1 }, { t: 'event' });
+    const half = Math.floor(league.rounds / 2);
+    const R = league.rounds;
+    A.push({ t: 'block', n: 1 }, { t: 'league', round: half, kind: 'derby' }, { t: 'event' });
     A.push({ t: 'cup', stage: KO_STAGES[0] });
     if (hasCont) A.push({ t: 'cont', stage: KO_STAGES[0] });
     A.push({ t: 'interview' });
     A.push({ t: 'cup', stage: KO_STAGES[1] });
     if (hasCont) A.push({ t: 'cont', stage: KO_STAGES[1] });
     A.push({ t: 'block', n: 2 });
+    // Reta final da liga: clássico do returno, uma rodada de briga na tabela e a última rodada.
+    A.push({ t: 'league', round: R - 3, kind: 'derby' }, { t: 'league', round: R - 1, kind: 'race' }, { t: 'league', round: R, kind: 'last' });
     A.push({ t: 'cup', stage: KO_STAGES[2] });
     if (hasCont) A.push({ t: 'cont', stage: KO_STAGES[2] });
     A.push({ t: 'cup', stage: KO_STAGES[3] });
@@ -238,15 +271,16 @@ const Season = (() => {
 
   /**
    * Meia temporada simulada: rodadas da liga e fases iniciais das copas.
-   * Bloco 1: primeiro turno, 1ª e 2ª fases da copa e fase de grupos continental.
-   * Bloco 2: segundo turno e jogos da seleção.
+   * Bloco 1: primeiro turno (menos a última rodada, que pode ser um clássico), 1ª e 2ª fases
+   * da copa e fase de grupos continental.
+   * Bloco 2: segundo turno até faltarem 4 rodadas (a reta final é jogada passo a passo) e jogos da seleção.
    * @param {AgendaItem} item Passo atual (item.n = 1 ou 2).
    */
   function runBlock(item) {
     const S = G.S;
     const L = S.league;
     const club = World.current();
-    const target = item.n === 1 ? Math.floor(L.rounds / 2) : L.rounds;
+    const target = item.n === 1 ? Math.floor(L.rounds / 2) - 1 : L.rounds - 4;
     const startGames = S.stats.games;
     const startPossible = S.stats.possible;
     while (L.played < target) Sim.leagueRound();
@@ -256,7 +290,8 @@ const Season = (() => {
     if (item.n === 1) {
       if (S.cup.alive) {
         for (const stage of ['1ª fase', '2ª fase']) {
-          const opp = World.domesticOpp(1);
+          const opp = World.domesticOpp(1, faced('cup'));
+          faced('cup').push(opp.n);
           if (!Sim.simKO(club.s, opp.s)) {
             S.cup.alive = false;
             feedText(`${S.cup.name}: eliminado na ${stage} pelo ${opp.n}.`);
@@ -294,6 +329,89 @@ const Season = (() => {
   }
 
   /**
+   * O que está em jogo para o clube do jogador numa rodada da liga. Cada tipo de rodada
+   * vira jogo lance a lance por um motivo:
+   * - 'derby': clássico famoso contra um rival da mesma liga (js/data/rivals.js);
+   * - 'race': briga pelo título (até 4 pontos entre 1º e 2º na reta final), luta contra o rebaixamento ou
+   *   briga pelo acesso (as duas últimas só no Brasil, onde há acesso e rebaixamento);
+   * - 'last': última rodada valendo o título.
+   * Os outros motivos que também valerem na rodada entram no texto (ex.: "El Clásico · Briga pelo título").
+   * @param {AgendaItem} item Passo da liga (item.round, item.kind).
+   * @returns {{reasons: string[], decider: boolean, rival: string|null, classicName: string|null}}
+   *   Motivos (vazio = jogo comum), se vale o título na última rodada e o rival do clássico.
+   */
+  function leagueStakes(item) {
+    const L = G.S.league;
+    const club = World.current();
+    const t = Sim.sortedTable();
+    const pos = Sim.myPos();
+    const me = t[pos - 1];
+    const n = t.length;
+    const lead = t[0].pts - t[1].pts;
+
+    const decider = item.round === L.rounds && pos <= 2 && lead <= 3 && (pos === 1 || t[0].pts - me.pts <= 3);
+    const race = item.round >= L.rounds - 3 && pos <= 2 && lead <= 4; // só na reta final
+    const relegation = club.c === 'BR' && club.d < 4 && n > 8 && (pos > n - 4 || t[n - 5].pts - me.pts >= -3);
+    const promotion = club.c === 'BR' && club.d > 1 && n > 8
+      && ((pos <= 4 && me.pts - t[4].pts <= 4) || (pos > 4 && t[3].pts - me.pts <= 3));
+    const classics = item.kind === 'derby' ? World.classicsOf(G.club).filter(c => L.table.some(r => r.n === c.rival)) : [];
+    const classic = classics.length ? pick(classics) : null;
+
+    const trigger = { derby: Boolean(classic), race: race || relegation || promotion, last: decider }[item.kind];
+    if (!trigger) return { reasons: [], decider: false, rival: null, classicName: null };
+
+    const reasons = [];
+    if (decider) reasons.push('Última rodada valendo o título');
+    else if (race) reasons.push('Briga pelo título');
+    if (classic) reasons.push(classic.name);
+    if (relegation) reasons.push('Luta contra o rebaixamento');
+    if (promotion) reasons.push('Briga pelo acesso');
+    const rival = classic ? classic.rival : null;
+    const classicName = classic ? classic.name : null;
+    return { reasons, decider, rival, classicName };
+  }
+
+  /**
+   * Rodada importante da liga. Simula a liga até a rodada anterior e, se houver algo em jogo
+   * (clássico, briga pelo título, última rodada decisiva, rebaixamento ou acesso), o jogo do
+   * clube é disputado lance a lance. Senão, a rodada é simulada.
+   * A última rodada valendo o título é uma partida completa; as outras são jogos rápidos.
+   * @param {AgendaItem} item Passo atual (item.round, item.kind).
+   */
+  function runLeague(item) {
+    const L = G.S.league;
+    if (item.done || L.played >= item.round) return next();
+    while (L.played < item.round - 1) Sim.leagueRound();
+    const { reasons, decider, rival, classicName } = leagueStakes(item);
+    if (!reasons.length) {
+      Sim.leagueRound();
+      return next();
+    }
+    const club = World.current();
+    // Não repete adversário no mesmo turno (o clássico do returno conta).
+    const turn = faced(item.round <= Math.floor(L.rounds / 2) ? 'league1' : 'league2');
+    const others = L.table.filter(r => r.n !== G.club);
+    const fresh = others.filter(r => !turn.includes(r.n));
+    const row = rival ? others.find(r => r.n === rival) : pick(fresh.length ? fresh : others);
+    turn.push(row.n);
+    const label = reasons.join(' · ');
+    Match.start({
+      kind: 'club', comp: L.name, stage: `${item.round}ª rodada · ${label}`, quick: !decider,
+      knockout: false, league: true, label,
+      ourName: club.n, ourClub: club.n, ourStr: club.s,
+      opp: { n: row.n, s: row.s, club: row.n }, home: rnd() < 0.5,
+      onEnd: res => {
+        Sim.leagueRound({ opp: row.n, us: res.us, them: res.them });
+        const pos = Sim.myPos();
+        const pts = Sim.sortedTable()[pos - 1].pts;
+        const what = res.win ? 'Vitória' : res.draw ? 'Empate' : 'Derrota';
+        if (item.round === L.rounds && pos === 1) return `${res.win ? '' : `${what}, mas os rivais também tropeçaram. `}<b>Campeão ${World.ofComp(L.name)}!</b>`;
+        return `${what}${classicName ? ` no ${classicName}` : ''}. O ${club.n} está em <b>${pos}º</b> com ${pts} pontos.`;
+      },
+    });
+  }
+
+  /**
    * Jogo de mata-mata da copa nacional (oitavas em diante).
    * @param {AgendaItem} item Passo atual (item.stage).
    */
@@ -302,7 +420,7 @@ const Season = (() => {
     if (item.done || !S.cup.alive) return next();
     const club = World.current();
     const share = { 'Oitavas de final': 1, 'Quartas de final': 0.8, Semifinal: 0.5, Final: 0.35 }[item.stage];
-    const opp = World.domesticOpp(share);
+    const opp = opponentFor(item, 'cup', ex => World.domesticOpp(share, ex));
     const isFinal = item.stage === 'Final';
     Match.start({
       kind: 'club', comp: S.cup.name, stage: item.stage, quick: !isFinal,
@@ -330,7 +448,7 @@ const Season = (() => {
     const S = G.S;
     if (item.done || !S.cont || !S.cont.alive) return next();
     const club = World.current();
-    const opp = World.contOpp(item.stage);
+    const opp = opponentFor(item, 'cont', ex => World.contOpp(item.stage, ex));
     const isFinal = item.stage === 'Final';
     Match.start({
       kind: 'club', comp: S.cont.name, stage: item.stage, quick: !isFinal,
@@ -412,7 +530,7 @@ const Season = (() => {
     if (item.done) return next();
     const c = World.country(G.p.nat);
     const ranges = { 'Oitavas de final': [72, 84], 'Quartas de final': [78, 87], Semifinal: [80, 89], Final: [83, 89] };
-    const opp = World.natRival(...ranges[item.stage], tournamentConfed(item.name));
+    const opp = opponentFor(item, 'tourn', ex => World.natRival(...ranges[item.stage], tournamentConfed(item.name), ex));
     const isFinal = item.stage === 'Final';
     Match.start({
       kind: 'nat', comp: `${item.name} ${G.year}`, stage: item.stage, quick: !isFinal,
@@ -631,10 +749,25 @@ const Season = (() => {
       breakdown: Object.entries(breakdown).map(([reason, delta]) => ({ reason, delta })),
       age: p.age,
       value: World.marketValue(p),
-      forcedRetirement: p.age >= 38 || (p.age >= 35 && p.ovr < 62),
+      forcedRetirement: retirementForced(p),
+      extended: p.age >= 38 && p.age < 45 && p.ovr >= 90,
       canRetire: p.age >= 33,
       callHint: !G.nat.called && p.ovr >= 80,
     };
+  }
+
+  /**
+   * Aposentadoria obrigatória. Aos 38 a carreira acaba, a não ser que o overall siga em 90 ou
+   * mais: aí ela continua até os 45 enquanto o overall se mantiver. Quem chega aos 45 ainda
+   * em alto nível ganha o título "O terror de duas gerações" (ver Progression.records).
+   * @param {Player} p Jogador (já com a idade da próxima temporada).
+   * @returns {boolean}
+   */
+  function retirementForced(p) {
+    if (p.age >= 45 && p.ovr >= 90) G.twoGenerations = true;
+    if (p.age >= 45) return true;
+    if (p.age >= 38) return p.ovr < 90;
+    return p.age >= 35 && p.ovr < 62;
   }
 
   /**
@@ -815,6 +948,7 @@ const Season = (() => {
     baseEnd: runBaseEnd,
     estadual: runEstadual,
     block: runBlock,
+    league: runLeague,
     cup: runCup,
     cont: runCont,
     mundial: runMundial,
