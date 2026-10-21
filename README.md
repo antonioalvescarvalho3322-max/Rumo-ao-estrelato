@@ -30,6 +30,17 @@ O progresso fica salvo no próprio navegador (`localStorage`), com a opção "Co
 | **Cartinha** | No fim da carreira, uma carta no estilo do FIFA com o overall máximo, posição, bandeira, número e seis atributos. O visual muda com o legado (azul com dourado para GOATs e o Rei, ouro para Craque, prata para Bom jogador, bronze). Dá para colocar a sua foto e salvar a imagem (no celular, abre a opção de salvar na galeria). |
 | **Conselho do ídolo** | Só nos clubes com ídolo histórico (Flamengo/Zico, Barcelona/Messi, Bayern/Kahn, Roma/Totti etc.). |
 
+## Publicar (GitHub Pages)
+
+O jogo é um site estático: não precisa de servidor, banco de dados nem build.
+
+1. No GitHub, abra **Settings → Pages**.
+2. Em **Source**, escolha **Deploy from a branch**, selecione a branch do jogo e a pasta **/ (root)** e salve.
+3. Em 1 ou 2 minutos o site fica em `https://<seu-usuario>.github.io/<nome-do-repositorio>/`.
+
+Para testar localmente, abra o `index.html` no navegador ou rode `python3 -m http.server` na pasta e acesse `http://localhost:8000`.
+As fontes vêm do Google Fonts; sem internet, o jogo usa fontes do sistema.
+
 ## Escudos oficiais
 
 O jogo já sabe mostrar o escudo de cada clube (na escolha da base, no topo da tela, nos placares,
