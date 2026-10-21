@@ -303,10 +303,14 @@ const PlayerCard = (() => {
     try {
       if (document.fonts) await document.fonts.load(`800 64px ${DISPLAY_FONT}`);
     } catch (e) { /* segue com a fonte reserva */ }
+    // A carreira pode ter sido apagada ("Nova carreira") enquanto as fontes carregavam.
+    if (!G) return;
+    const photo = await loadImage(G.photo);
+    if (!G) return;
     const canvas = document.createElement('canvas');
     canvas.width = W;
     canvas.height = H;
-    draw(canvas, await loadImage(G.photo));
+    draw(canvas, photo);
     target.src = canvas.toDataURL('image/png');
     lastBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
   }
