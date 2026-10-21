@@ -158,11 +158,14 @@ const World = (() => {
    * @param {number} minS Força mínima.
    * @param {number} maxS Força máxima.
    * @param {string} [confed] Se informado, só seleções dessa confederação (eliminatórias e torneio continental).
+   * @param {string[]} [exclude] Seleções já enfrentadas no torneio (não repetem; se não sobrar ninguém, são liberadas).
    * @returns {{n: string, s: number}}
    */
-  function natRival(minS, maxS, confed) {
+  function natRival(minS, maxS, confed, exclude = []) {
     const own = country(G.p.nat).name;
-    const candidates = NATION_RIVALS.filter(([n, , c]) => n !== own && (!confed || c === confed));
+    const all = NATION_RIVALS.filter(([n, , c]) => n !== own && (!confed || c === confed));
+    const fresh = all.filter(([n]) => !exclude.includes(n));
+    const candidates = fresh.length ? fresh : all;
     let pool = candidates.filter(([, s]) => s >= minS && s <= maxS);
     if (!pool.length) {
       // Ninguém na faixa: usa as duas seleções de força mais próxima.
@@ -176,24 +179,26 @@ const World = (() => {
   /**
    * Adversário na copa nacional, entre os clubes mais fortes do país.
    * @param {number} topShare Fração dos melhores clubes considerada (1 = todos).
+   * @param {string[]} [exclude] Clubes já enfrentados na copa (não repetem).
    * @returns {Club}
    */
-  function domesticOpp(topShare) {
+  function domesticOpp(topShare, exclude = []) {
     const me = current();
-    const pool = Object.values(G.clubs).filter(x => x.c === me.c && x.n !== me.n).sort((a, b) => b.s - a.s);
+    const pool = Object.values(G.clubs).filter(x => x.c === me.c && x.n !== me.n && !exclude.includes(x.n)).sort((a, b) => b.s - a.s);
     return pick(pool.slice(0, Math.max(2, Math.ceil(pool.length * topShare))));
   }
 
   /**
    * Adversário no torneio continental, mais forte nas fases finais.
    * @param {string} stage Fase ('groups', 'Oitavas de final', ..., 'Final').
+   * @param {string[]} [exclude] Clubes já enfrentados no mata-mata (não repetem).
    * @returns {Club}
    */
-  function contOpp(stage) {
+  function contOpp(stage, exclude = []) {
     const me = current();
     const conf = confedOf(me);
     const pool = Object.values(G.clubs)
-      .filter(x => confedOf(x) === conf && x.d === 1 && x.n !== me.n)
+      .filter(x => confedOf(x) === conf && x.d === 1 && x.n !== me.n && !exclude.includes(x.n))
       .sort((a, b) => b.s - a.s);
     let slice;
     if (G.S.cont && G.S.cont.type === 'second') {

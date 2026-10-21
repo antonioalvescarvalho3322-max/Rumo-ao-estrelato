@@ -47,6 +47,7 @@
  * @property {'derby'|'race'|'last'} [kind] Tipo de rodada importante (passo 'league'; ver Season.leagueStakes).
  * @property {string} [id] Evento escolhido (para não sortear de novo ao retomar).
  * @property {Object} [view] Resultado já calculado (para não aplicar duas vezes ao retomar).
+ * @property {Object} [opp] Adversário sorteado para o jogo deste passo.
  */
 
 /**
@@ -72,6 +73,7 @@
  * @property {number} ovrStart Overall no início da temporada.
  * @property {number} benchRate Fração de jogos fora do time no último bloco.
  * @property {string[]} used Eventos já usados na temporada.
+ * @property {Object<string, string[]>} [faced] Adversários já enfrentados por competição (sem repetir no mata-mata).
  * @property {number} moreOffers Bônus de propostas para a próxima janela.
  * @property {Object} [league] Tabela da liga.
  * @property {{name: string, alive: boolean}} [cup] Copa nacional.

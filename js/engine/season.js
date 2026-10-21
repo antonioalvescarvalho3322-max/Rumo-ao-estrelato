@@ -88,6 +88,35 @@ const Season = (() => {
   }
 
   /**
+   * Lista dos adversários já enfrentados numa competição nesta temporada, para que ninguém
+   * apareça duas vezes no mesmo mata-mata (ou no mesmo turno da liga).
+   * @param {string} key Competição (ex.: 'cup', 'cont', 'tourn', 'league2').
+   * @returns {string[]} Lista (pode ser alterada: quem a recebe acrescenta o novo adversário).
+   */
+  function faced(key) {
+    G.S.faced = G.S.faced || {};
+    G.S.faced[key] = G.S.faced[key] || [];
+    return G.S.faced[key];
+  }
+
+  /**
+   * Adversário de um passo da agenda: sorteado uma vez e guardado no próprio passo
+   * (ao retomar uma carreira salva, o jogo continua contra o mesmo time).
+   * @param {AgendaItem} item Passo atual.
+   * @param {string} key Competição (ver faced).
+   * @param {(exclude: string[]) => {n: string}} draw Sorteio que recebe os já enfrentados.
+   * @returns {Object} Adversário.
+   */
+  function opponentFor(item, key, draw) {
+    if (!item.opp) {
+      const list = faced(key);
+      item.opp = draw(list);
+      list.push(item.opp.n);
+    }
+    return item.opp;
+  }
+
+  /**
    * Monta a temporada de base (16 anos): dois eventos, a campanha na copa sub-17 e a promoção.
    */
   function startBase() {
@@ -261,7 +290,8 @@ const Season = (() => {
     if (item.n === 1) {
       if (S.cup.alive) {
         for (const stage of ['1ª fase', '2ª fase']) {
-          const opp = World.domesticOpp(1);
+          const opp = World.domesticOpp(1, faced('cup'));
+          faced('cup').push(opp.n);
           if (!Sim.simKO(club.s, opp.s)) {
             S.cup.alive = false;
             feedText(`${S.cup.name}: eliminado na ${stage} pelo ${opp.n}.`);
@@ -358,8 +388,12 @@ const Season = (() => {
       return next();
     }
     const club = World.current();
+    // Não repete adversário no mesmo turno (o clássico do returno conta).
+    const turn = faced(item.round <= Math.floor(L.rounds / 2) ? 'league1' : 'league2');
     const others = L.table.filter(r => r.n !== G.club);
-    const row = rival ? others.find(r => r.n === rival) : pick(others);
+    const fresh = others.filter(r => !turn.includes(r.n));
+    const row = rival ? others.find(r => r.n === rival) : pick(fresh.length ? fresh : others);
+    turn.push(row.n);
     const label = reasons.join(' · ');
     Match.start({
       kind: 'club', comp: L.name, stage: `${item.round}ª rodada · ${label}`, quick: !decider,
@@ -386,7 +420,7 @@ const Season = (() => {
     if (item.done || !S.cup.alive) return next();
     const club = World.current();
     const share = { 'Oitavas de final': 1, 'Quartas de final': 0.8, Semifinal: 0.5, Final: 0.35 }[item.stage];
-    const opp = World.domesticOpp(share);
+    const opp = opponentFor(item, 'cup', ex => World.domesticOpp(share, ex));
     const isFinal = item.stage === 'Final';
     Match.start({
       kind: 'club', comp: S.cup.name, stage: item.stage, quick: !isFinal,
@@ -414,7 +448,7 @@ const Season = (() => {
     const S = G.S;
     if (item.done || !S.cont || !S.cont.alive) return next();
     const club = World.current();
-    const opp = World.contOpp(item.stage);
+    const opp = opponentFor(item, 'cont', ex => World.contOpp(item.stage, ex));
     const isFinal = item.stage === 'Final';
     Match.start({
       kind: 'club', comp: S.cont.name, stage: item.stage, quick: !isFinal,
@@ -496,7 +530,7 @@ const Season = (() => {
     if (item.done) return next();
     const c = World.country(G.p.nat);
     const ranges = { 'Oitavas de final': [72, 84], 'Quartas de final': [78, 87], Semifinal: [80, 89], Final: [83, 89] };
-    const opp = World.natRival(...ranges[item.stage], tournamentConfed(item.name));
+    const opp = opponentFor(item, 'tourn', ex => World.natRival(...ranges[item.stage], tournamentConfed(item.name), ex));
     const isFinal = item.stage === 'Final';
     Match.start({
       kind: 'nat', comp: `${item.name} ${G.year}`, stage: item.stage, quick: !isFinal,
